@@ -1,0 +1,37 @@
+.toolbar {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  display: flex;
+  gap: 10px;
+}
+
+.toolbar button {
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar button:hover {
+  background: #f0f0f0;
+}
+
+.toolbar button.active {
+  background: #e0e0e0;
+  border-color: #999;
+}
+
+.toolbar-group {
+  display: flex;
+  gap: 5px;
+  padding: 0 10px;
+  border-right: 1px solid #ccc;
+}
+
+.toolbar-group:last-child {
+  border-right: none;
+}
