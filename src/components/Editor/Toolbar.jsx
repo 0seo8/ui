@@ -1,74 +1,131 @@
+import { useState } from "react";
+import PropTypes from "prop-types";
+import * as Toolbar from "@radix-ui/react-toolbar";
 import "./Toolbar.css";
 
-const Toolbar = ({ editor }) => {
-  if (!editor) {
-    return null;
-  }
+const EditorToolbar = ({ onStyleChange, selectedElement }) => {
+  const [styles, setStyles] = useState({
+    fontWeight: "normal",
+    fontStyle: "normal",
+    textDecoration: "none",
+    textAlign: "left",
+    fontSize: "16px",
+    fontFamily: "Arial",
+  });
+
+  const handleStyleChange = (property, value) => {
+    const newStyles = { ...styles, [property]: value };
+    setStyles(newStyles);
+    onStyleChange && onStyleChange(newStyles);
+  };
 
   return (
-    <div className="toolbar">
-      <div className="toolbar-group">
-        <button
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={editor.isActive("bold") ? "active" : ""}
-        >
-          굵게
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={editor.isActive("italic") ? "active" : ""}
-        >
-          기울임
-        </button>
-      </div>
-
-      <div className="toolbar-group">
-        <button
-          onClick={() => editor.chain().focus().setTextAlign("left").run()}
-          className={editor.isActive({ textAlign: "left" }) ? "active" : ""}
-        >
-          왼쪽
-        </button>
-        <button
-          onClick={() => editor.chain().focus().setTextAlign("center").run()}
-          className={editor.isActive({ textAlign: "center" }) ? "active" : ""}
-        >
-          가운데
-        </button>
-        <button
-          onClick={() => editor.chain().focus().setTextAlign("right").run()}
-          className={editor.isActive({ textAlign: "right" }) ? "active" : ""}
-        >
-          오른쪽
-        </button>
-      </div>
-
-      <div className="toolbar-group">
-        <button
+    <Toolbar.Root className="toolbar-root" aria-label="텍스트 스타일링">
+      <Toolbar.ToggleGroup type="multiple" aria-label="텍스트 스타일">
+        <Toolbar.ToggleItem
+          className="toolbar-toggle-item"
+          value="bold"
+          aria-label="굵게"
           onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 1 }).run()
+            handleStyleChange(
+              "fontWeight",
+              styles.fontWeight === "bold" ? "normal" : "bold"
+            )
           }
-          className={editor.isActive("heading", { level: 1 }) ? "active" : ""}
         >
-          H1
-        </button>
-        <button
+          B
+        </Toolbar.ToggleItem>
+        <Toolbar.ToggleItem
+          className="toolbar-toggle-item"
+          value="italic"
+          aria-label="기울임"
           onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 2 }).run()
+            handleStyleChange(
+              "fontStyle",
+              styles.fontStyle === "italic" ? "normal" : "italic"
+            )
           }
-          className={editor.isActive("heading", { level: 2 }) ? "active" : ""}
         >
-          H2
-        </button>
-        <button
-          onClick={() => editor.chain().focus().setParagraph().run()}
-          className={editor.isActive("paragraph") ? "active" : ""}
+          I
+        </Toolbar.ToggleItem>
+        <Toolbar.ToggleItem
+          className="toolbar-toggle-item"
+          value="underline"
+          aria-label="밑줄"
+          onClick={() =>
+            handleStyleChange(
+              "textDecoration",
+              styles.textDecoration === "underline" ? "none" : "underline"
+            )
+          }
         >
-          본문
-        </button>
-      </div>
-    </div>
+          U
+        </Toolbar.ToggleItem>
+      </Toolbar.ToggleGroup>
+
+      <Toolbar.Separator className="toolbar-separator" />
+
+      <Toolbar.ToggleGroup
+        type="single"
+        defaultValue="left"
+        aria-label="텍스트 정렬"
+      >
+        <Toolbar.ToggleItem
+          className="toolbar-toggle-item"
+          value="left"
+          aria-label="왼쪽 정렬"
+          onClick={() => handleStyleChange("textAlign", "left")}
+        >
+          ←
+        </Toolbar.ToggleItem>
+        <Toolbar.ToggleItem
+          className="toolbar-toggle-item"
+          value="center"
+          aria-label="가운데 정렬"
+          onClick={() => handleStyleChange("textAlign", "center")}
+        >
+          ↔
+        </Toolbar.ToggleItem>
+        <Toolbar.ToggleItem
+          className="toolbar-toggle-item"
+          value="right"
+          aria-label="오른쪽 정렬"
+          onClick={() => handleStyleChange("textAlign", "right")}
+        >
+          →
+        </Toolbar.ToggleItem>
+      </Toolbar.ToggleGroup>
+
+      <Toolbar.Separator className="toolbar-separator" />
+
+      <select
+        className="toolbar-select"
+        value={styles.fontFamily}
+        onChange={(e) => handleStyleChange("fontFamily", e.target.value)}
+      >
+        <option value="Arial">Arial</option>
+        <option value="Pretendard">Pretendard</option>
+        <option value="Noto Sans KR">Noto Sans KR</option>
+      </select>
+
+      <select
+        className="toolbar-select"
+        value={styles.fontSize}
+        onChange={(e) => handleStyleChange("fontSize", e.target.value)}
+      >
+        {[12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 60].map((size) => (
+          <option key={size} value={`${size}px`}>
+            {size}px
+          </option>
+        ))}
+      </select>
+    </Toolbar.Root>
   );
 };
 
-export default Toolbar;
+EditorToolbar.propTypes = {
+  onStyleChange: PropTypes.func,
+  selectedElement: PropTypes.object,
+};
+
+export default EditorToolbar;

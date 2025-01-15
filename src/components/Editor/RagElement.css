@@ -1,0 +1,37 @@
+.resize-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: #fff;
+  border: 1px solid #0099ff;
+  border-radius: 50%;
+}
+
+.top-left {
+  top: -4px;
+  left: -4px;
+  cursor: nw-resize;
+}
+
+.top-right {
+  top: -4px;
+  right: -4px;
+  cursor: ne-resize;
+}
+
+.bottom-left {
+  bottom: -4px;
+  left: -4px;
+  cursor: sw-resize;
+}
+
+.bottom-right {
+  bottom: -4px;
+  right: -4px;
+  cursor: se-resize;
+}
+
+.rag-element {
+  user-select: none;
+  position: relative;
+}
