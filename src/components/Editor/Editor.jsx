@@ -1,15 +1,84 @@
 import { useState, useEffect, useCallback } from "react";
+import { useParams } from "react-router-dom";
 import RagElement from "./RagElement";
 import EditorToolbar from "./Toolbar";
+import TableEditor from "../TableEditor/TableEditor";
+import { mockData } from "../../mocks/data";
 import "./RagElement.css";
+import PropTypes from "prop-types";
 
 const Editor = () => {
+  const { templateId } = useParams();
   const [elements, setElements] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [clipboard, setClipboard] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSavedState, setLastSavedState] = useState(null);
+  const [tableContent, setTableContent] = useState(null);
+
+  // 템플릿 불러오기
+  useEffect(() => {
+    const loadTemplate = async () => {
+      try {
+        // 목업 데이터 사용
+        const data = mockData[templateId];
+        if (data) {
+          // 첫 번째 테이블을 찾아서 설정
+          const tableMatch = data[0].answer.match(/<table>.*?<\/table>/s);
+          if (tableMatch) {
+            setTableContent(tableMatch[0]);
+          }
+        }
+      } catch (error) {
+        console.error("템플릿 불러오기 실패:", error);
+      }
+    };
+
+    loadTemplate();
+  }, [templateId]);
+
+  // 테이블 내용 변경 처리
+  const handleTableChange = (newHtmlContent) => {
+    setTableContent(newHtmlContent);
+    // TODO: 변경된 내용 저장
+  };
+
+  // 자동 저장
+  useEffect(() => {
+    const autoSave = async () => {
+      if (!templateId || isSaving || !elements.length) return;
+      if (JSON.stringify(elements) === JSON.stringify(lastSavedState)) return;
+
+      try {
+        setIsSaving(true);
+        const templateData = {
+          elements,
+          updatedAt: new Date().toISOString(),
+        };
+
+        if (templateId === "new") {
+          const savedTemplate = await saveTemplate(templateData);
+          // URL 업데이트
+          window.history.replaceState(null, "", `/editor/${savedTemplate.id}`);
+        } else {
+          await updateTemplate(templateId, templateData);
+        }
+
+        setLastSavedState(elements);
+      } catch (error) {
+        console.error("자동 저장 실패:", error);
+        // TODO: 에러 처리
+      } finally {
+        setIsSaving(false);
+      }
+    };
+
+    const timeoutId = setTimeout(autoSave, 3000); // 3초 후 자동 저장
+    return () => clearTimeout(timeoutId);
+  }, [elements, templateId, isSaving, lastSavedState]);
 
   // 히스토리에 상태 저장
   const saveToHistory = useCallback(
@@ -353,6 +422,9 @@ const Editor = () => {
     <div style={{ position: "relative", width: "100%", height: "100vh" }}>
       <div style={{ padding: "10px" }}>
         <button onClick={handleAddElement}>RAG 추가</button>
+        {isSaving && (
+          <span style={{ marginLeft: "10px", color: "#666" }}>저장 중...</span>
+        )}
         {(selectedId || selectedIds.size > 0) && (
           <EditorToolbar
             onStyleChange={handleStyleChange}
@@ -364,13 +436,21 @@ const Editor = () => {
         style={{
           position: "relative",
           height: "calc(100% - 60px)",
+          padding: "20px",
           border: "1px solid #ddd",
+          overflow: "auto",
         }}
         onClick={() => {
           setSelectedId(null);
           setSelectedIds(new Set());
         }}
       >
+        {tableContent && (
+          <TableEditor
+            htmlContent={tableContent}
+            onChange={handleTableChange}
+          />
+        )}
         {elements.map((element) => (
           <RagElement
             key={element.id}
@@ -389,6 +469,10 @@ const Editor = () => {
       </div>
     </div>
   );
+};
+
+Editor.propTypes = {
+  templateId: PropTypes.string,
 };
 
 export default Editor;

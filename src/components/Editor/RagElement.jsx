@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 
 const RagElement = ({
@@ -17,15 +17,30 @@ const RagElement = ({
   const [size, setSize] = useState(initialSize);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const elementRef = useRef(null);
+  const textRef = useRef(null);
   const dragStartPos = useRef({ x: 0, y: 0 });
   const resizeStartSize = useRef({ width: 0, height: 0 });
   const resizeStartPos = useRef({ x: 0, y: 0 });
   const resizeType = useRef("");
 
+  useEffect(() => {
+    setPosition(initialPosition);
+  }, [initialPosition]);
+
+  useEffect(() => {
+    setSize(initialSize);
+  }, [initialSize]);
+
   const handleMouseDown = (e) => {
     if (e.target.classList.contains("resize-handle")) {
       handleResizeStart(e);
+      return;
+    }
+
+    if (e.target === textRef.current) {
+      setIsEditing(true);
       return;
     }
 
@@ -34,7 +49,7 @@ const RagElement = ({
       x: e.clientX - position.x,
       y: e.clientY - position.y,
     };
-    onClick && onClick(id);
+    onClick && onClick(e, id);
   };
 
   const handleResizeStart = (e) => {
@@ -103,7 +118,11 @@ const RagElement = ({
     setIsResizing(false);
   };
 
-  React.useEffect(() => {
+  const handleBlur = () => {
+    setIsEditing(false);
+  };
+
+  useEffect(() => {
     if (isDragging || isResizing) {
       window.addEventListener("mousemove", handleMouseMove);
       window.addEventListener("mouseup", handleMouseUp);
@@ -125,13 +144,15 @@ const RagElement = ({
         width: size.width,
         height: size.height,
         border: selected ? "2px solid skyblue" : "1px solid #ddd",
-        cursor: isDragging ? "grabbing" : "grab",
+        cursor: isDragging ? "grabbing" : isEditing ? "text" : "grab",
         backgroundColor: "transparent",
+        userSelect: "none",
         ...style,
       }}
       onMouseDown={handleMouseDown}
     >
       <div
+        ref={textRef}
         contentEditable
         suppressContentEditableWarning
         style={{
@@ -139,10 +160,16 @@ const RagElement = ({
           height: "100%",
           outline: "none",
           padding: "4px",
+          cursor: "text",
+          userSelect: "text",
+          whiteSpace: "pre-wrap",
+          wordBreak: "break-word",
         }}
         onInput={(e) =>
           onValueChange && onValueChange(id, e.target.textContent)
         }
+        onBlur={handleBlur}
+        onClick={(e) => e.stopPropagation()}
       >
         {value}
       </div>
