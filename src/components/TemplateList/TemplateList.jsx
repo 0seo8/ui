@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getTemplates, deleteTemplate } from "../../services/api";
+import TableEditor from "../TableEditor/TableEditor";
 import "./TemplateList.css";
 
 const TemplateList = () => {
@@ -45,6 +46,22 @@ const TemplateList = () => {
     return tableMatch ? tableMatch[0] : null;
   };
 
+  const handleTableSave = (templateId, newTableHtml) => {
+    setTemplates((prevTemplates) =>
+      prevTemplates.map((template) =>
+        template.leaflet_id === templateId
+          ? {
+              ...template,
+              answer: template.answer.replace(
+                /<table>.*?<\/table>/s,
+                newTableHtml
+              ),
+            }
+          : template
+      )
+    );
+  };
+
   if (loading) return <div className="template-list-loading">로딩 중...</div>;
   if (error) return <div className="template-list-error">{error}</div>;
 
@@ -63,28 +80,23 @@ const TemplateList = () => {
         <div className="template-list">
           {templates.map((template) => (
             <div key={template.leaflet_id} className="template-item">
-              <Link
-                to={`/editor/${template.leaflet_id}`}
-                className="template-link"
-              >
-                <div className="template-info">
-                  <h3>{template.cmetadata?.title || "제목 없음"}</h3>
-                  <p>{template.cmetadata?.subtitle || "설명 없음"}</p>
-                  <div className="template-query">
-                    <strong>Query:</strong> {template.query}
-                  </div>
-                  <div className="template-answer">
-                    {template.answer && (
-                      <div
-                        className="table-container"
-                        dangerouslySetInnerHTML={{
-                          __html: extractTableHtml(template.answer),
-                        }}
-                      />
-                    )}
-                  </div>
+              <div className="template-info">
+                <h3>{template.cmetadata?.title || "제목 없음"}</h3>
+                <p>{template.cmetadata?.subtitle || "설명 없음"}</p>
+                <div className="template-query">
+                  <strong>Query:</strong> {template.query}
                 </div>
-              </Link>
+                <div className="template-answer">
+                  {template.answer && extractTableHtml(template.answer) && (
+                    <TableEditor
+                      htmlContent={extractTableHtml(template.answer)}
+                      onSave={(newTableHtml) =>
+                        handleTableSave(template.leaflet_id, newTableHtml)
+                      }
+                    />
+                  )}
+                </div>
+              </div>
               <button
                 onClick={(e) => handleDelete(template.leaflet_id, e)}
                 className="template-delete-button"

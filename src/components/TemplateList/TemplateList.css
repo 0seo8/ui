@@ -1,6 +1,6 @@
 .template-list-container {
   padding: 20px;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -31,7 +31,7 @@
 
 .template-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
   gap: 20px;
 }
 
@@ -40,10 +40,13 @@
   border-radius: 8px;
   overflow: hidden;
   position: relative;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-width: 600px;
 }
 
 .template-item:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .template-link {
@@ -69,28 +72,35 @@
 }
 
 .template-info {
-  padding: 10px 0;
+  padding: 20px;
 }
 
 .template-info h3 {
-  margin: 0 0 8px 0;
+  margin: 0 0 12px 0;
+  font-size: 20px;
   color: #333;
 }
 
 .template-info p {
-  margin: 0 0 8px 0;
+  margin: 0 0 12px 0;
   color: #666;
 }
 
 .template-query {
-  margin: 8px 0;
-  font-size: 0.9em;
+  margin: 12px 0;
+  padding: 8px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  font-size: 0.95em;
   color: #555;
 }
 
 .template-answer {
-  margin-top: 12px;
+  margin-top: 16px;
   overflow-x: auto;
+  background-color: #fff;
+  border-radius: 4px;
+  padding: 8px;
 }
 
 .table-container {
@@ -125,9 +135,9 @@
 
 .template-delete-button {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  padding: 4px 8px;
+  top: 12px;
+  right: 12px;
+  padding: 6px 12px;
   background-color: #dc3545;
   color: white;
   border: none;
@@ -154,5 +164,28 @@
 }
 
 .template-list-error {
-  color: #ff4444;
+  color: #dc3545;
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+  .template-list-container {
+    padding: 10px;
+  }
+
+  .template-list {
+    grid-template-columns: 1fr;
+  }
+
+  .template-item {
+    min-width: auto;
+  }
+
+  .template-info {
+    padding: 15px;
+  }
+
+  .template-info h3 {
+    font-size: 18px;
+  }
 }
